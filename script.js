@@ -12,14 +12,19 @@ fetch('model/metadata.json')
 let model;
 let labels;
 
-async function loadModel() {
+async function loadModelOnly() {
   try {
-    console.log('Loading model...');
+    console.log('Loading model only...');
     model = await tf.loadGraphModel('model/model.json');
     console.log('Model loaded successfully:', model);
+  } catch (error) {
+    console.error('Error loading the model:', error);
+  }
+}
 
-    // Fetch metadata (labels)
-    console.log('Fetching metadata...');
+async function fetchMetadataOnly() {
+  try {
+    console.log('Fetching metadata only...');
     const metadataResponse = await fetch('model/metadata.json');
     if (!metadataResponse.ok) {
       throw new Error('Failed to load metadata.json');
@@ -33,9 +38,12 @@ async function loadModel() {
 
     console.log('Metadata loaded successfully:', labels);
   } catch (error) {
-    console.error('Error loading the model or metadata:', error);
+    console.error('Error fetching metadata:', error);
   }
 }
 
-// Call the loadModel function directly for debugging
-loadModel();
+// Call the loadModelOnly function directly for debugging
+loadModelOnly();
+
+// Call the fetchMetadataOnly function directly for debugging
+fetchMetadataOnly();
