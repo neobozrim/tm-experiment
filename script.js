@@ -2,10 +2,20 @@ let model;
 let labels;
 
 async function loadModel() {
-  model = await tf.loadGraphModel('model/model.json');
-  const metadata = await fetch('model/metadata.json');
-  const metadataJson = await metadata.json();
-  labels = metadataJson.labels;
+  try {
+    model = await tf.loadGraphModel('model/model.json');
+    const metadata = await fetch('model/metadata.json');
+    if (!metadata.ok) {
+      throw new Error('Failed to load metadata.json');
+    }
+    const metadataJson = await metadata.json();
+    labels = metadataJson.labels;
+    if (!labels) {
+      throw new Error('Labels not found in metadata.json');
+    }
+  } catch (error) {
+    console.error('Error loading the model or metadata:', error);
+  }
 }
 
 async function preprocessImage(imageElement) {
