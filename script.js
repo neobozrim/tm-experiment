@@ -6,7 +6,7 @@ async function loadModel() {
     console.log('Loading model...');
     model = await tf.loadGraphModel('model/model.json');
     console.log('Model loaded successfully');
-    
+
     const metadataResponse = await fetch('model/metadata.json');
     if (!metadataResponse.ok) {
       throw new Error('Failed to load metadata.json');
@@ -29,6 +29,7 @@ async function preprocessImage(imageElement) {
     .resizeNearestNeighbor([224, 224])
     .toFloat()
     .expandDims();
+  console.log('Image preprocessed');
   return tensor.div(255.0); // Normalize the image
 }
 
@@ -38,13 +39,17 @@ async function predict(imageElement) {
   }
 
   const processedImage = await preprocessImage(imageElement);
+  console.log('Processed image:', processedImage);
+
   const predictions = await model.predict(processedImage).data();
+  console.log('Predictions:', predictions);
 
   return predictions;
 }
 
 async function classifyImage(imageElement) {
   const predictions = await predict(imageElement);
+  console.log('Classify image - predictions:', predictions);
 
   // Define a threshold for "undefined" classification
   const threshold = 0.5; // Example threshold, adjust based on your model's performance
@@ -69,7 +74,9 @@ document.getElementById('predictButton').addEventListener('click', async () => {
   const image = new Image();
   image.src = URL.createObjectURL(fileInput.files[0]);
   image.onload = async () => {
+    console.log('Image loaded for prediction');
     const result = await classifyImage(image);
+    console.log('Classification result:', result);
     document.getElementById('result').innerText = `Classification: ${result}`;
   };
 });
