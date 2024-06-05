@@ -3,12 +3,14 @@ let labels;
 
 async function loadModel() {
   try {
+    // Load the TensorFlow.js model
     model = await tf.loadGraphModel('model/model.json');
-    const metadata = await fetch('model/metadata.json');
-    if (!metadata.ok) {
+    // Fetch metadata (labels)
+    const metadataResponse = await fetch('model/metadata.json');
+    if (!metadataResponse.ok) {
       throw new Error('Failed to load metadata.json');
     }
-    const metadataJson = await metadata.json();
+    const metadataJson = await metadataResponse.json();
     labels = metadataJson.labels;
     if (!labels) {
       throw new Error('Labels not found in metadata.json');
@@ -66,3 +68,4 @@ document.getElementById('predictButton').addEventListener('click', async () => {
     document.getElementById('result').innerText = `Classification: ${result}`;
   };
 });
+
