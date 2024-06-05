@@ -1,0 +1,58 @@
+let model;
+let labels;
+
+async function loadModel() {
+  model = await tf.loadGraphModel('model/model.json');
+  const metadata = await fetch('model/metadata.json');
+  const metadataJson = await metadata.json();
+  labels = metadataJson.labels;
+}
+
+async function preprocessImage(imageElement) {
+  const tensor = tf.browser.fromPixels(imageElement)
+    .resizeNearestNeighbor([224, 224])
+    .toFloat()
+    .expandDims();
+  return tensor.div(255.0); // Normalize the image
+}
+
+async function predict(imageElement) {
+  if (!model) {
+    await loadModel();
+  }
+
+  const processedImage = await preprocessImage(imageElement);
+  const predictions = await model.predict(processedImage).data();
+
+  return predictions;
+}
+
+async function classifyImage(imageElement) {
+  const predictions = await predict(imageElement);
+
+  // Define a threshold for "undefined" classification
+  const threshold = 0.5; // Example threshold, adjust based on your model's performance
+
+  const maxPrediction = Math.max(...predictions);
+  const maxIndex = predictions.indexOf(maxPrediction);
+
+  if (maxPrediction < threshold) {
+    return 'undefined';
+  } else {
+    return labels[maxIndex];
+  }
+}
+
+document.getElementById('predictButton').addEventListener('click', async () => {
+  const fileInput = document.getElementById('imageUpload');
+  if (fileInput.files.length === 0) {
+    alert('Please select an image file.');
+    return;
+  }
+  const image = new Image();
+  image.src = URL.createObjectURL(fileInput.files[0]);
+  image.onload = async () => {
+    const result = await classifyImage(image);
+    document.getElementById('result').innerText = `Classification: ${result}`;
+  };
+});
