@@ -1,3 +1,14 @@
+// Temporary direct fetch for metadata.json to test accessibility
+fetch('model/metadata.json')
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok ' + response.statusText);
+    }
+    return response.json();
+  })
+  .then(data => console.log('Metadata fetched directly:', data))
+  .catch(error => console.error('Error fetching metadata directly:', error));
+
 let model;
 let labels;
 
@@ -95,4 +106,3 @@ document.getElementById('predictButton').addEventListener('click', async () => {
     document.getElementById('result').innerText = `Classification: ${result}`;
   };
 });
-
