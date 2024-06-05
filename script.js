@@ -7,6 +7,8 @@ async function loadModel() {
     model = await tf.loadGraphModel('model/model.json');
     console.log('Model loaded successfully');
 
+    // Fetch metadata (labels)
+    console.log('Fetching metadata...');
     const metadataResponse = await fetch('model/metadata.json');
     if (!metadataResponse.ok) {
       throw new Error('Failed to load metadata.json');
@@ -34,21 +36,29 @@ async function preprocessImage(imageElement) {
 }
 
 async function predict(imageElement) {
-  if (!model) {
-    await loadModel();
+  try {
+    if (!model) {
+      await loadModel();
+    }
+
+    const processedImage = await preprocessImage(imageElement);
+    console.log('Processed image:', processedImage);
+
+    const predictions = await model.predict(processedImage).data();
+    console.log('Predictions:', predictions);
+
+    return predictions;
+  } catch (error) {
+    console.error('Error during prediction:', error);
   }
-
-  const processedImage = await preprocessImage(imageElement);
-  console.log('Processed image:', processedImage);
-
-  const predictions = await model.predict(processedImage).data();
-  console.log('Predictions:', predictions);
-
-  return predictions;
 }
 
 async function classifyImage(imageElement) {
   const predictions = await predict(imageElement);
+  if (!predictions) {
+    console.error('No predictions received');
+    return 'undefined';
+  }
   console.log('Classify image - predictions:', predictions);
 
   // Define a threshold for "undefined" classification
