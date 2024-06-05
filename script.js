@@ -5,7 +5,7 @@ async function loadModel() {
   try {
     console.log('Loading model...');
     model = await tf.loadGraphModel('model/model.json');
-    console.log('Model loaded successfully');
+    console.log('Model loaded successfully:', model);
 
     // Fetch metadata (labels)
     console.log('Fetching metadata...');
@@ -38,7 +38,12 @@ async function preprocessImage(imageElement) {
 async function predict(imageElement) {
   try {
     if (!model) {
+      console.log('Model not loaded yet, loading now...');
       await loadModel();
+    }
+
+    if (!model) {
+      throw new Error('Model failed to load');
     }
 
     const processedImage = await preprocessImage(imageElement);
@@ -90,3 +95,4 @@ document.getElementById('predictButton').addEventListener('click', async () => {
     document.getElementById('result').innerText = `Classification: ${result}`;
   };
 });
+
